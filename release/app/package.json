@@ -1,0 +1,19 @@
+{
+	"name": "nxt-desktop-template",
+	"version": "1.0.0",
+	"description": "NEXTRONIC DESKTOPAPP TEMPLATE",
+	"license": "MIT",
+	"author": {
+		"name": "ELKHADIRI ABDERRAZAK",
+		"email": "elkhadiri.abderrazak@gmail.com"
+	},
+	"main": "./dist/main/main.js",
+	"scripts": {
+		"electron-rebuild": "node -r ts-node/register ../../.nxt/scripts/electron-rebuild.js",
+		"postinstall": "npm run electron-rebuild && npm run link-modules",
+		"link-modules": "node -r ts-node/register ../../.nxt/scripts/link-modules.ts"
+	},
+	"dependencies": {
+		"serialport": "^10.4.0"
+	}
+}

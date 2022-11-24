@@ -1,0 +1,22 @@
+{
+	"connection": {
+		"brokers": [
+			{
+				"name": "nextronic",
+				"ip": "nextronic.ddns.me",
+				"port": 1883
+			},
+			{
+				"name": "APTIV",
+				"ip": "10.253.231.230",
+				"port": 1883
+			}
+		]
+	},
+	"device": {
+		"name": "BT188IO",
+		"axis": "z",
+		"threshold": 11000
+	}
+}
+
