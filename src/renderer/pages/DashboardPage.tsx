@@ -17,20 +17,10 @@ import MotorIcon from '../images/motor.svg';
 import DownTimeTotoal from '../images/downTimeTotal.svg';
 
 const formatUptime = (seconds: number) => {
-	const minutes = Math.floor(seconds / 60) % 60;
-	const hours = Math.floor(Math.floor(seconds / 60) / 60);
-	let result = '';
-
-	if (hours < 10) result += `0${hours}:`;
-	else {
-		result += `${hours}:`;
-	}
-
-	if (minutes < 10) result += `0${minutes}`;
-	else {
-		result += minutes;
-	}
-
+	const minutes = Math.floor(seconds / 60);
+	const sec = seconds % 60;
+	let result = `${minutes}m `;
+	result += `${sec}s`;
 	return result;
 };
 
