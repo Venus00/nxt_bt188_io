@@ -2,6 +2,7 @@
 import { SerialPort } from 'serialport';
 import { DelimiterParser } from '@serialport/parser-delimiter';
 import { Timer } from 'timer-node';
+import * as cron from 'node-cron';
 
 export enum EventType {
 	ON_OP = 'on_op',
@@ -21,8 +22,6 @@ export class TwistingMachine {
 
 	public state: MachineState;
 
-	private activeDay: number;
-
 	private onEvent: (event: EventType, payload: any) => void;
 
 	public constructor(
@@ -36,13 +35,21 @@ export class TwistingMachine {
 		this.timer.clear();
 		this.timer.start();
 		this.state = {
-			report: 0,
 			io: 0,
 			downtime: 0,
 			opCount: 0,
 			status: 'IDLE',
+			hour: 0,
+			opCountPerHour: [0, 0, 0, 0, 0, 0, 0, 0],
+			downtimePerShift: 0,
 		};
-		this.activeDay = new Date().getDay();
+
+		// shift setup hour
+		const hour = new Date().getHours();
+		if (hour >= 6 && hour < 14) this.state.hour = hour - 6;
+		else if (hour >= 14 && hour < 22) this.state.hour = hour - 14;
+		else if (hour < 6) this.state.hour = hour + 2;
+		else this.state.hour = hour - 22;
 
 		this.port = new SerialPort(
 			{
@@ -66,32 +73,39 @@ export class TwistingMachine {
 		);
 
 		setInterval(this.hearthBeat.bind(this), 1000);
+
+		cron.schedule('0 * * * *', () => {
+			if (this.state.hour > 6) {
+				this.state.opCountPerHour = [0, 0, 0, 0, 0, 0, 0, 0];
+				this.state.hour = 0;
+				this.state.opCount = 0;
+				this.state.downtimePerShift = 0;
+			} else this.state.hour += 1;
+		});
 	}
 
 	public hearthBeat() {
-		const currentDay = new Date().getDay();
-		if (this.activeDay !== currentDay) {
-			this.state.report = this.state.opCount;
-			this.state.opCount = 0;
-			this.activeDay = currentDay;
-		}
-		this.state.downtime = Math.floor(this.timer.ms() / 1000);
+		const time = Math.floor(this.timer.ms() / 1000);
+		this.state.downtime = time;
+		if (time > 30) this.state.downtimePerShift = time - 30;
 		this.onEvent(EventType.ON_DATA, this.state);
 	}
 
 	private handleDeviceMessage(chunk: any) {
+		// eslint-disable-next-line radix
 		const data = parseInt(chunk.toString().trim());
 
-		//hold
+		// hold
 		if (data === 1 && this.state.io === 0) {
-			this.state.opCount += 1;
 			this.timer.clear();
 			this.timer.pause();
 			this.state.downtime = 0;
+			this.state.opCount += 1;
+			this.state.opCountPerHour[this.state.hour] += 1;
 			this.state.status = 'TWISTING';
 		}
 
-		//release
+		// release
 		if (data === 0 && this.state.io === 1) {
 			this.timer.start();
 			this.state.status = 'IDLE';

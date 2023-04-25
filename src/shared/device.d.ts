@@ -12,5 +12,8 @@ interface MachineState {
 	opCount: number;
 	io: number;
 	status: 'IDLE' | 'TWISTING';
+	opCountPerHour: number[];
+	hour: number;
+	downtimePerShift: number;
 }
 
