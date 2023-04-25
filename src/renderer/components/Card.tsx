@@ -17,8 +17,8 @@ const Card: React.FC<ComponentPropTypes> = ({
 			</div>
 			{/* TODO: add font and text color */}
 			<div className="px-4 py-1 flex flex-col justify-evenly items-center">
-				<p className="text-gray-500 font-bold">{title}</p>
-				<p className="text-gray-600 font-bold text-xl font-custom">
+				<p className="text-white font-bold">{title}</p>
+				<p className="text-white font-bold text-xl font-custom">
 					{body}
 				</p>
 			</div>
